@@ -1,6 +1,6 @@
 data "aws_ami" "stack_ami" {
-  owners = ["self"]
-  # owners      = ["767398027423"]
+  # owners = ["self"]
+  owners      = ["767398027423"]
   name_regex  = "^stack-ami-.*"
   most_recent = true
   filter {
