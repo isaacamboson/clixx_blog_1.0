@@ -353,8 +353,8 @@ resource "aws_db_instance" "clixx_app_db_instance" {
   engine              = "mysql"
   engine_version      = "8.0.28"
   identifier          = "wordpressdbclixx"
-  # snapshot_identifier = "arn:aws:rds:us-east-1:577701061234:snapshot:wordpressdbclixx-ecs-snapshot"
-  snapshot_identifier    = "arn:aws:rds:us-east-1:767398027423:snapshot:wordpressdbclixx-snapshot"
+  snapshot_identifier = "arn:aws:rds:us-east-1:577701061234:snapshot:wordpressdbclixx-ecs-snapshot"
+  # snapshot_identifier    = "arn:aws:rds:us-east-1:767398027423:snapshot:wordpressdbclixx-snapshot"
   vpc_security_group_ids = [aws_security_group.rds-sg.id]
   parameter_group_name   = "default.mysql8.0"
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group_name.name
@@ -374,8 +374,8 @@ resource "aws_db_instance" "blog_db_instance" {
   engine              = "mysql"
   engine_version      = "8.0.35"
   identifier          = "wordpressinstance"
-  # snapshot_identifier = "wordpressinstance-snapshot"
-  snapshot_identifier    = "arn:aws:rds:us-east-1:767398027423:snapshot:wordpressinstance-snapshot"
+  snapshot_identifier = "wordpressinstance-snapshot"
+  # snapshot_identifier    = "arn:aws:rds:us-east-1:767398027423:snapshot:wordpressinstance-snapshot"
   vpc_security_group_ids = [aws_security_group.rds-sg.id]
   parameter_group_name   = "default.mysql8.0"
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group_name.name
@@ -411,36 +411,36 @@ resource "local_file" "web_key" {
 # Route53
 #--------------------------------------------------------
 
-# # route53 for clixx application
-# resource "aws_route53_record" "clixx_route53" {
-#   zone_id = data.aws_route53_zone.stack_isaac_zone.id
-#   name    = "dev.clixx"
-#   type    = "A"
-#   # ttl     = 5
+# route53 for clixx application
+resource "aws_route53_record" "clixx_route53" {
+  zone_id = data.aws_route53_zone.stack_isaac_zone.id
+  name    = "dev.clixx"
+  type    = "A"
+  # ttl     = 5
 
-#   alias {
-#     name                   = aws_lb.clixx_lb.dns_name
-#     zone_id                = aws_lb.clixx_lb.zone_id
-#     evaluate_target_health = true
-#   }
+  alias {
+    name                   = aws_lb.clixx_lb.dns_name
+    zone_id                = aws_lb.clixx_lb.zone_id
+    evaluate_target_health = true
+  }
 
-#   depends_on = [aws_lb.clixx_lb]
-# }
+  depends_on = [aws_lb.clixx_lb]
+}
 
-# # route53 for blog
-# resource "aws_route53_record" "blog_route53" {
-#   zone_id = data.aws_route53_zone.stack_isaac_zone.id
-#   name    = "dev.blog"
-#   type    = "A"
-#   # ttl     = 5
+# route53 for blog
+resource "aws_route53_record" "blog_route53" {
+  zone_id = data.aws_route53_zone.stack_isaac_zone.id
+  name    = "dev.blog"
+  type    = "A"
+  # ttl     = 5
 
-#   alias {
-#     name                   = aws_lb.blog_lb.dns_name
-#     zone_id                = aws_lb.blog_lb.zone_id
-#     evaluate_target_health = true
-#   }
+  alias {
+    name                   = aws_lb.blog_lb.dns_name
+    zone_id                = aws_lb.blog_lb.zone_id
+    evaluate_target_health = true
+  }
 
-#   depends_on = [aws_lb.blog_lb]
-# }
+  depends_on = [aws_lb.blog_lb]
+}
 
 

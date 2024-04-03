@@ -1,6 +1,6 @@
 data "aws_ami" "stack_ami" {
-  # owners = ["self"]
-  owners      = ["767398027423"]
+  owners = ["self"]
+  # owners      = ["767398027423"]
   name_regex  = "^stack-ami-.*"
   most_recent = true
   filter {
@@ -10,10 +10,10 @@ data "aws_ami" "stack_ami" {
 }
 
 
-# data "aws_route53_zone" "stack_isaac_zone" {
-#   name         = "stack-isaac.com." # Notice the dot!!!
-#   private_zone = false
-# }
+data "aws_route53_zone" "stack_isaac_zone" {
+  name         = "stack-isaac.com." # Notice the dot!!!
+  private_zone = false
+}
 
 
 data "aws_secretsmanager_secret_version" "creds" {
