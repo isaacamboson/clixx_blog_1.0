@@ -19,25 +19,31 @@ pipeline {
              }
          }
 
-         stage('terraform plan'){
+         stage('terraform destroy'){
             steps {
-                 sh "terraform plan -out=tfplan -input=false"
+                 sh "terraform destroy -auto-approve"
             }
         }
 
-         stage('Final Deployment Approval') {
-            steps {
-                script {
-                    def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm'] ])
-                }
-            }
-         }
+        //  stage('terraform plan'){
+        //     steps {
+        //          sh "terraform plan -out=tfplan -input=false"
+        //     }
+        // }
 
-        stage('Terraform Apply'){
-            steps {
-                 sh "terraform apply  -input=false tfplan"
-            }
-        }
+        //  stage('Final Deployment Approval') {
+        //     steps {
+        //         script {
+        //             def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm'] ])
+        //         }
+        //     }
+        //  }
+
+        // stage('Terraform Apply'){
+        //     steps {
+        //          sh "terraform apply  -input=false tfplan"
+        //     }
+        // }
     }
 }
 
