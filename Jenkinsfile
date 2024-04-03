@@ -23,8 +23,8 @@ pipeline {
 
          stage('terraform plan'){
             steps {
-                sh "terraform plan --auto-approve"
-                // sh "terraform plan -out=tfplan -input=false"
+                // sh "terraform plan --auto-approve"
+                sh "terraform plan -out=tfplan -input=false"
             }
         }
 
