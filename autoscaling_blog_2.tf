@@ -30,13 +30,13 @@ resource "aws_lb_listener" "blog-lb-listener" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "blog-tg-attachment_az_a" {
-  # count            = length(aws_instance.aws_server_blog_az_a)
-  target_group_arn = aws_lb_target_group.blog_lb_target_group.arn
-  # target_id        = aws_instance.aws_server_blog_az_a[count.index].id
-  target_id = aws_lb.blog_lb.arn
-  port             = 80
-}
+# resource "aws_lb_target_group_attachment" "blog-tg-attachment" {
+#   # count            = length(aws_instance.aws_server_blog_az_a)
+#   target_group_arn = aws_lb_target_group.blog_lb_target_group.arn
+#   # target_id        = aws_instance.aws_server_blog_az_a[count.index].id
+#   target_id = aws_lb.blog_lb.arn
+#   port             = 80
+# }
 
 # resource "aws_lb_target_group_attachment" "blog-tg-attachment_az_b" {
 #   count            = length(aws_instance.aws_server_blog_az_b)
