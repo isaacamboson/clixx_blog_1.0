@@ -36,8 +36,10 @@ pipeline {
             }
          }
 
-        stage('Terraform Apply'){
+
+        stage('Terraform Final Action'){
             steps {
+                script{stage("Performing Terraform ${ACTION}")}
                 sh "terraform ${ACTION} --auto-approve"
                 //  sh "terraform apply  -input=false tfplan"
             }
