@@ -88,8 +88,11 @@ resource "aws_launch_template" "blog-app-launch-temp" {
     }
   }
 
-  tags = {
-    Name = "Blog_Instance"
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "Blog"
+    }
   }
 
 }
