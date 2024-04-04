@@ -30,21 +30,6 @@ resource "aws_lb_listener" "blog-lb-listener" {
   }
 }
 
-# resource "aws_lb_target_group_attachment" "blog-tg-attachment" {
-#   # count            = length(aws_instance.aws_server_blog_az_a)
-#   target_group_arn = aws_lb_target_group.blog_lb_target_group.arn
-#   # target_id        = aws_instance.aws_server_blog_az_a[count.index].id
-#   target_id = aws_lb.blog_lb.arn
-#   port             = 80
-# }
-
-# resource "aws_lb_target_group_attachment" "blog-tg-attachment_az_b" {
-#   count            = length(aws_instance.aws_server_blog_az_b)
-#   target_group_arn = aws_lb_target_group.blog_lb_target_group.arn
-#   target_id        = aws_instance.aws_server_blog_az_b[count.index].id
-#   port             = 80
-# }
-
 #creating Launch Template
 resource "aws_launch_template" "blog-app-launch-temp" {
   name          = "${local.BlogPrefix}-launch-temp"
@@ -112,9 +97,9 @@ resource "aws_launch_template" "blog-app-launch-temp" {
 #creating Auto Scaling Group
 resource "aws_autoscaling_group" "blog_app_asg" {
   name                      = "${local.BlogPrefix}-asg"
-  desired_capacity          = 1
-  max_size                  = 4
-  min_size                  = 1
+  desired_capacity          = 4
+  max_size                  = 6
+  min_size                  = 2
   health_check_grace_period = 300
   health_check_type         = "ELB"
   vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
