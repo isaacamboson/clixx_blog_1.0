@@ -2,6 +2,8 @@ pipeline {
     agent any
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
+        ACTION = "destroy"
+        RUNNER = "Isaac"
     }
 
     stages{
@@ -15,7 +17,7 @@ pipeline {
 
          stage('terraform init'){
              steps {
-                slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                slackSend (color: '#FFFF00', message: "STARTED: Job by (${RUNNER})' ${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                 sh "terraform init"
              }
          }
