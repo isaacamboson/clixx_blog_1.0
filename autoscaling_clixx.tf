@@ -50,7 +50,7 @@ resource "aws_launch_template" "clixx-app-launch-temp" {
   image_id      = var.image_id
   instance_type = var.instance_type
   key_name      = aws_key_pair.stack_key_pair.key_name
-  user_data     = filebase64("${path.module}/scripts/bootstrap_clixx_packer.sh")
+  user_data     = filebase64("${path.module}/scripts/bootstrap.sh")
 
   network_interfaces {
     associate_public_ip_address = true
