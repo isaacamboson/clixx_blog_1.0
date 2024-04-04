@@ -442,5 +442,3 @@ resource "aws_route53_record" "blog_route53" {
 
   depends_on = [aws_lb.blog_lb]
 }
-
-
