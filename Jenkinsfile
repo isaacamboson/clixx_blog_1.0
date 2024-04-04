@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
-        ACTION = "apply"
+        ACTION = "destroy"
         RUNNER = "Isaac"
     }
 
@@ -10,7 +10,7 @@ pipeline {
         stage('Initial Deployment Approval') {
               steps {
                 script {
-                def userInput = input(id: 'confirm', message: 'Start Pipeline?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: true, description: 'Start Pipeline', name: 'confirm'] ])
+                def userInput = input(id: 'confirm', message: 'Start Pipeline?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Start Pipeline', name: 'confirm'] ])
              }
            }
         }
@@ -34,7 +34,7 @@ pipeline {
          stage('Final Deployment Approval') {
             steps {
                 script {
-                    def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: true, description: 'Apply terraform', name: 'confirm'] ])
+                    def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm'] ])
                 }
             }
          }
