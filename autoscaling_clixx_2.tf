@@ -1,5 +1,8 @@
 
+#-------------------------------------------------------------------------
 #creating load balancer
+#-------------------------------------------------------------------------
+
 resource "aws_lb" "clixx_lb" {
   name                       = "${local.ApplicationPrefix}-lb"
   internal                   = false
@@ -9,15 +12,22 @@ resource "aws_lb" "clixx_lb" {
   enable_deletion_protection = false
 }
 
-#creating load balancer target group
+#-------------------------------------------------------------------------
+#creating target group
+#-------------------------------------------------------------------------
+
 resource "aws_lb_target_group" "clixx_lb_target_group" {
-  name        = "${local.ApplicationPrefix}-lb-target-group"
-  port        = 80
-  protocol    = "HTTP"
-#   target_type = "instance"
-  vpc_id      = aws_vpc.vpc_main.id
-  depends_on  = [aws_lb.clixx_lb]
+  name     = "${local.ApplicationPrefix}-lb-target-group"
+  port     = 80
+  protocol = "HTTP"
+  #   target_type = "instance"
+  vpc_id     = aws_vpc.vpc_main.id
+  depends_on = [aws_lb.clixx_lb]
 }
+
+#-------------------------------------------------------------------------
+#creating LB listener
+#-------------------------------------------------------------------------
 
 resource "aws_lb_listener" "clixx-lb-listener" {
   load_balancer_arn = aws_lb.clixx_lb.arn
@@ -30,76 +40,74 @@ resource "aws_lb_listener" "clixx-lb-listener" {
   }
 }
 
-#creating Launch Template
-resource "aws_launch_template" "clixx-app-launch-temp" {
-  name          = "${local.ApplicationPrefix}-launch-temp"
-  image_id      = data.aws_ami.stack_ami.image_id
-  instance_type = var.EC2_Components["instance_type"]
-  key_name      = aws_key_pair.stack_key_pair.key_name
-  user_data     = filebase64("${path.module}/scripts/bootstrap.sh")
+#-------------------------------------------------------------------------
+# creating launch configuration
+#-------------------------------------------------------------------------
 
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+resource "aws_launch_configuration" "clixx-launch-config" {
+  name_prefix                 = "${local.ApplicationPrefix}-app-launch-config"
+  image_id                    = data.aws_ami.stack_ami.image_id
+  instance_type               = var.EC2_Components["instance_type"]
+  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  user_data                   = filebase64("${path.module}/scripts/bootstrap.sh")
+  associate_public_ip_address = true
+  key_name                    = "${local.ApplicationPrefix}-app"
+
+  lifecycle {
+    create_before_destroy = true
   }
 
-  block_device_mappings {
+  root_block_device {
+    volume_type           = var.EC2_Components["volume_type"]
+    volume_size           = var.EC2_Components["volume_size"]
+    delete_on_termination = var.EC2_Components["delete_on_termination"]
+    encrypted             = var.EC2_Components["encrypted"]
+  }
+
+  ebs_block_device {
     device_name = "/dev/sdb"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdc"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdd"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sde"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdf"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
-  }
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "Clixx-App"
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
 }
 
+#-------------------------------------------------------------------------
 #creating Auto Scaling Group
+#-------------------------------------------------------------------------
+
 resource "aws_autoscaling_group" "clixx_app_asg" {
   name                      = "${local.ApplicationPrefix}-asg"
+  launch_configuration = aws_launch_configuration.clixx-launch-config.name
   desired_capacity          = 4
   max_size                  = 6
   min_size                  = 2
@@ -108,13 +116,7 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
   vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
   target_group_arns         = [aws_lb_target_group.clixx_lb_target_group.arn]
   default_cooldown          = 300
-  # availability_zones        = [var.availability_zone]
-
-#   instance_maintenance_policy {
-#     min_healthy_percentage = 90
-#     max_healthy_percentage = 120
-#   }
-
+ 
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",
@@ -124,11 +126,6 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
   ]
 
   metrics_granularity = "1Minute"
-
-  launch_template {
-    id      = aws_launch_template.clixx-app-launch-temp.id
-    version = aws_launch_template.clixx-app-launch-temp.latest_version
-  }
 
   depends_on = [aws_lb.clixx_lb]
 }
