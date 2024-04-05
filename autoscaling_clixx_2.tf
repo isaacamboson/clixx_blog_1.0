@@ -175,31 +175,31 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   alarm_actions   = [aws_autoscaling_policy.scaling_up.arn]
 }
 
-# #scaling down policy
-# resource "aws_autoscaling_policy" "scaling_down" {
-#   name                   = "${local.ApplicationPrefix}-asg-scaling-down"
-#   autoscaling_group_name = aws_autoscaling_group.clixx_app_asg.name
-#   adjustment_type        = "ChangeInCapacity"
-#   scaling_adjustment     = "-1"
-#   cooldown               = "30"
-#   policy_type            = "SimpleScaling"
-# }
+#scaling down policy
+resource "aws_autoscaling_policy" "scaling_down" {
+  name                   = "${local.ApplicationPrefix}-asg-scaling-down"
+  autoscaling_group_name = aws_autoscaling_group.clixx_app_asg.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "-1"
+  cooldown               = "30"
+  policy_type            = "SimpleScaling"
+}
 
 # scale down alarm
-# resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
-#   alarm_name          = "${local.ApplicationPrefix}-asg-scale-down-alarm"
-#   alarm_description   = "asg-scale-down-cpu-alarm"
-#   comparison_operator = "LessThanOrEqualToThreshold"
-#   evaluation_periods  = "2"
-#   metric_name         = "CPUUtilization"
-#   namespace           = "AWS/EC2"
-#   period              = "120"
-#   statistic           = "Average"
-#   threshold           = "10" # Instance will scale down when CPU utilization is lower than 5 %
-#   dimensions = {
-#     "AutoScalingGroupName" = aws_autoscaling_group.clixx_app_asg.name
-#   }
-#   actions_enabled = true
-#   alarm_actions   = [aws_autoscaling_policy.scaling_down.arn]
-# }
+resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
+  alarm_name          = "${local.ApplicationPrefix}-asg-scale-down-alarm"
+  alarm_description   = "asg-scale-down-cpu-alarm"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "20" # Instance will scale down when CPU utilization is lower than 5 %
+  dimensions = {
+    "AutoScalingGroupName" = aws_autoscaling_group.clixx_app_asg.name
+  }
+  actions_enabled = true
+  alarm_actions   = [aws_autoscaling_policy.scaling_down.arn]
+}
 
