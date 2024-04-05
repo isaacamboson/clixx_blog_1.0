@@ -99,7 +99,6 @@ resource "aws_launch_configuration" "blog-launch-config" {
     encrypted   = true
   }
 
-
 }
 
 #-------------------------------------------------------------------------
@@ -108,6 +107,7 @@ resource "aws_launch_configuration" "blog-launch-config" {
 
 resource "aws_autoscaling_group" "blog_app_asg" {
   name                      = "${local.BlogPrefix}-asg"
+  launch_configuration = aws_launch_configuration.blog-launch-config.name
   desired_capacity          = 4
   max_size                  = 6
   min_size                  = 2

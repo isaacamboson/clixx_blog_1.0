@@ -107,7 +107,7 @@ resource "aws_launch_configuration" "clixx-launch-config" {
 
 resource "aws_autoscaling_group" "clixx_app_asg" {
   name                      = "${local.ApplicationPrefix}-asg"
-  launch_configuration = aws_launch_configuration.clixx-launch-config.name
+  launch_configuration      = aws_launch_configuration.clixx-launch-config.name
   desired_capacity          = 4
   max_size                  = 6
   min_size                  = 2
@@ -116,7 +116,7 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
   vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
   target_group_arns         = [aws_lb_target_group.clixx_lb_target_group.arn]
   default_cooldown          = 300
- 
+
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",
