@@ -23,6 +23,15 @@ resource "aws_lb_target_group" "clixx_lb_target_group" {
   #   target_type = "instance"
   vpc_id     = aws_vpc.vpc_main.id
   depends_on = [aws_lb.clixx_lb]
+
+  health_check {
+    path                = "/index.html"
+    protocol            = "HTTP"
+    interval            = 15
+    timeout             = 3
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
 }
 
 #-------------------------------------------------------------------------
@@ -45,11 +54,12 @@ resource "aws_lb_listener" "clixx-lb-listener" {
 #-------------------------------------------------------------------------
 
 resource "aws_launch_configuration" "clixx-launch-config" {
-  name_prefix                 = "${local.ApplicationPrefix}-app-launch-config"
-  image_id                    = data.aws_ami.stack_ami.image_id
-  instance_type               = var.EC2_Components["instance_type"]
-  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
-  user_data                   = filebase64("${path.module}/scripts/bootstrap.sh")
+  name_prefix     = "${local.ApplicationPrefix}-app-launch-config"
+  image_id        = data.aws_ami.stack_ami.image_id
+  instance_type   = var.EC2_Components["instance_type"]
+  security_groups = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  #   user_data                   = filebase64("${path.module}/scripts/bootstrap.sh")
+  user_data                   = data.template_file.bootstrap.rendered
   associate_public_ip_address = true
   key_name                    = aws_key_pair.stack_key_pair.key_name
 
