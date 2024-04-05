@@ -25,7 +25,7 @@ resource "aws_lb_target_group" "clixx_lb_target_group" {
   depends_on = [aws_lb.clixx_lb]
 
   health_check {
-    path                = "/index.html"
+    # path                = "/index.html"
     protocol            = "HTTP"
     interval            = 15
     timeout             = 3
@@ -136,6 +136,12 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
   ]
 
   metrics_granularity = "1Minute"
+
+  tag {
+    key = "Name"
+    value = "Clixx-App"
+    propagate_at_launch = true
+  }
 
   depends_on = [aws_lb.clixx_lb]
 }

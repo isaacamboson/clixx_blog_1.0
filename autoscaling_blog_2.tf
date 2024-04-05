@@ -20,12 +20,10 @@ resource "aws_lb_target_group" "blog_lb_target_group" {
   name     = "${local.BlogPrefix}-lb-target-group"
   port     = 80
   protocol = "HTTP"
-  # target_type = "instance"
   vpc_id = aws_vpc.vpc_main.id
-  # depends_on  = [aws_lb.blog_lb]
-
+  
   health_check {
-    path                = "/index.html"
+    # path                = "/index.html"
     protocol            = "HTTP"
     interval            = 15
     timeout             = 3
@@ -58,7 +56,6 @@ resource "aws_launch_configuration" "blog-launch-config" {
   image_id        = data.aws_ami.stack_ami.image_id
   instance_type   = var.EC2_Components["instance_type"]
   security_groups = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
-  # user_data                   = filebase64("${path.module}/scripts/bootstrap_blog.sh")
   user_data                   = data.template_file.bootstrap_blog.rendered
   associate_public_ip_address = true
   key_name                    = aws_key_pair.stack_key_pair.key_name
@@ -136,6 +133,12 @@ resource "aws_autoscaling_group" "blog_app_asg" {
   ]
 
   metrics_granularity = "1Minute"
+
+  tag {
+    key = "Name"
+    value = "Blog"
+    propagate_at_launch = true
+  }
 
   depends_on = [aws_lb.blog_lb]
 }
