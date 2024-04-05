@@ -44,7 +44,7 @@ resource "aws_lb_listener" "blog-lb-listener" {
 # creating launch configuration
 #-------------------------------------------------------------------------
 
-resource "aws_launch_configuration" "clixx-launch-config" {
+resource "aws_launch_configuration" "blog-launch-config" {
   name_prefix                 = "${local.BlogPrefix}-app-launch-config"
   image_id                    = data.aws_ami.stack_ami.image_id
   instance_type               = var.EC2_Components["instance_type"]
