@@ -51,7 +51,7 @@ resource "aws_launch_configuration" "blog-launch-config" {
   security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
   user_data                   = filebase64("${path.module}/scripts/bootstrap_blog.sh")
   associate_public_ip_address = true
-  key_name                    = "${local.BlogPrefix}-app"
+  key_name                    = aws_key_pair.stack_key_pair.key_name
 
   lifecycle {
     create_before_destroy = true
