@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "clixx_lb_target_group" {
   name        = "${local.ApplicationPrefix}-lb-target-group"
   port        = 80
   protocol    = "HTTP"
-  target_type = "instance"
+#   target_type = "instance"
   vpc_id      = aws_vpc.vpc_main.id
   depends_on  = [aws_lb.clixx_lb]
 }
