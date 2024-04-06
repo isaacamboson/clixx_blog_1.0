@@ -7,7 +7,7 @@ resource "aws_lb" "blog_lb" {
   name                       = "${local.BlogPrefix}-lb"
   internal                   = false
   load_balancer_type         = "application"
-  security_groups            = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  security_groups            = [aws_security_group.stack-sg.id, aws_security_group.bastion-sg.id]
   subnets                    = [aws_subnet.pub_subnet_1.id, aws_subnet.pub_subnet_2.id]
   enable_deletion_protection = false
 }
