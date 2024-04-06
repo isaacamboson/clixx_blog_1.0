@@ -57,7 +57,7 @@ resource "aws_launch_configuration" "clixx-launch-config" {
   name_prefix                 = "${local.ApplicationPrefix}-app-launch-config"
   image_id                    = data.aws_ami.stack_ami.image_id
   instance_type               = var.EC2_Components["instance_type"]
-  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  security_groups             = [aws_security_group.app-server-sg.id]
   user_data                   = data.template_file.bootstrap.rendered
   associate_public_ip_address = true
   # key_name                    = aws_key_pair.stack_key_pair.key_name

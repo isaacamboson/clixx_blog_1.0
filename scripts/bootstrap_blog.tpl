@@ -131,36 +131,6 @@ echo $FILE_SYSTEM_ID.efs.$REGION.amazonaws.com:/ $MOUNT_POINT nfs4 nfsvers=4.1,r
 mount -a -t nfs4
 chmod -R 755 /var/www/html
 
-
-# #installing updates without confirmation
-# #sudo yum update -y
-
-# #installing the latest versions of the LAMP MariaDB and PHP packages for Amazon Linux 2
-# sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-# sudo yum install -y httpd mariadb-server
-
-# #starting and enabling Apache server
-# sudo systemctl start httpd
-# sudo systemctl enable httpd
-
-# #verifying that Apache httpd is on 
-# sudo systemctl is-enabled httpd
-
-# #adding ec2-user to apache group to Modify ownership and permission
-# sudo usermod -a -G apache ec2-user
-
-# #verifying membership in the "Apache" group
-# groups
-
-# #changing the group ownership of /var/www and its content to the "Apache" group
-# #adding group write permissions and to set the group ID on future subdirectories, 
-# #change the directory permissions of /var/www and its subdirectories.
-# sudo chown -R ec2-user:apache /var/www
-# sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
-
-# #adding group write permissions, recursively change the file permissions of /var/www and its subdirectories:
-# find /var/www -type f -exec sudo chmod 0664 {} \;
-
 #installing PHP Admin
 sudo yum install php-mbstring -y
 
