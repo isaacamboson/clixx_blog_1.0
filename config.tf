@@ -33,3 +33,11 @@ data "template_file" "bootstrap_blog" {
     efs_id_blog = aws_efs_file_system.efs_blog.id
   }
 }
+
+data "template_file" "bastion_s3_cp_bootstrap" {
+  template = file(format("%s/scripts/bastion_s3_key_copy.tpl", path.module))
+  vars = {
+    s3_bucket = local.db_creds.s3_bucket
+    pem_key   = "private-key-kp.pem"
+  }
+}

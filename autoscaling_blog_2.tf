@@ -20,8 +20,8 @@ resource "aws_lb_target_group" "blog_lb_target_group" {
   name     = "${local.BlogPrefix}-lb-target-group"
   port     = 80
   protocol = "HTTP"
-  vpc_id = aws_vpc.vpc_main.id
-  
+  vpc_id   = aws_vpc.vpc_main.id
+
   health_check {
     # path                = "/index.html"
     protocol            = "HTTP"
@@ -52,13 +52,15 @@ resource "aws_lb_listener" "blog-lb-listener" {
 #-------------------------------------------------------------------------
 
 resource "aws_launch_configuration" "blog-launch-config" {
-  name_prefix     = "${local.BlogPrefix}-app-launch-config"
-  image_id        = data.aws_ami.stack_ami.image_id
-  instance_type   = var.EC2_Components["instance_type"]
-  security_groups = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  name_prefix                 = "${local.BlogPrefix}-app-launch-config"
+  image_id                    = data.aws_ami.stack_ami.image_id
+  instance_type               = var.EC2_Components["instance_type"]
+  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
   user_data                   = data.template_file.bootstrap_blog.rendered
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.stack_key_pair.key_name
+  # key_name                    = aws_key_pair.stack_key_pair.key_name
+  key_name = "private-key-kp"
+
 
   lifecycle {
     create_before_destroy = true
@@ -117,7 +119,7 @@ resource "aws_autoscaling_group" "blog_app_asg" {
   launch_configuration      = aws_launch_configuration.blog-launch-config.name
   desired_capacity          = 4
   max_size                  = 6
-  min_size                  = 2
+  min_size                  = 4
   health_check_grace_period = 300
   health_check_type         = "EC2"
   vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
@@ -135,8 +137,8 @@ resource "aws_autoscaling_group" "blog_app_asg" {
   metrics_granularity = "1Minute"
 
   tag {
-    key = "Name"
-    value = "Blog"
+    key                 = "Name"
+    value               = "Blog"
     propagate_at_launch = true
   }
 

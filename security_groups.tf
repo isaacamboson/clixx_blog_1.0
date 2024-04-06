@@ -197,6 +197,17 @@ resource "aws_security_group_rule" "ingress_icmp_app-server_sg" {
   source_security_group_id = aws_security_group.bastion-sg.id
 }
 
+#declaring "ingress" security group rules for NFS
+resource "aws_security_group_rule" "ingress_nfs_app_server_sg" {
+  security_group_id = aws_security_group.app-server-sg.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = 2049
+  to_port           = 2049
+  # cidr_blocks       = ["0.0.0.0/0"]
+  source_security_group_id = aws_security_group.bastion-sg.id
+}
+
 #declaring "egress" security group rules for ssh
 resource "aws_security_group_rule" "egress_allow_all_app-server_sg" {
   security_group_id        = aws_security_group.app-server-sg.id
@@ -204,6 +215,7 @@ resource "aws_security_group_rule" "egress_allow_all_app-server_sg" {
   protocol                 = "-1"
   from_port                = 0
   to_port                  = 0
+  # source_security_group_id = aws_security_group.bastion-sg.id
   source_security_group_id = aws_security_group.bastion-sg.id
 }
 
