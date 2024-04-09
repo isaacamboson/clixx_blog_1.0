@@ -12,7 +12,7 @@ resource "aws_route_table" "pub_custom_route_table" {
   }
 }
 
-# associating route tables with subnets
+# associating above custom route table with public subnets
 resource "aws_route_table_association" "rt_association_pb_sbnt_1" {
   subnet_id      = aws_subnet.pub_subnet_1.id
   route_table_id = aws_route_table.pub_custom_route_table.id
