@@ -1,28 +1,47 @@
 
+#-------------------------------------------------------------------------
 #creating load balancer
+#-------------------------------------------------------------------------
+
 resource "aws_lb" "clixx_lb" {
   name                       = "${local.ApplicationPrefix}-lb"
-  internal                   = var.lb_internal
-  load_balancer_type         = var.lb_load_balancer_type
-  security_groups            = [aws_security_group.stack-sg.id, aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.stack-sg.id, aws_security_group.bastion-sg.id]
   subnets                    = [aws_subnet.pub_subnet_1.id, aws_subnet.pub_subnet_2.id]
-  enable_deletion_protection = var.lb_enable_deletion_protection
+  enable_deletion_protection = false
 }
 
-#creating load balancer target group
+#-------------------------------------------------------------------------
+#creating target group
+#-------------------------------------------------------------------------
+
 resource "aws_lb_target_group" "clixx_lb_target_group" {
-  name        = "${local.ApplicationPrefix}-lb-target-group"
-  port        = var.lb_target_port
-  protocol    = var.lb_protocol
-  target_type = var.lb_target_type
-  vpc_id      = aws_vpc.vpc_main.id
-  depends_on  = [aws_lb.clixx_lb]
+  name     = "${local.ApplicationPrefix}-lb-target-group"
+  port     = 80
+  protocol = "HTTP"
+  #   target_type = "instance"
+  vpc_id     = aws_vpc.vpc_main.id
+  depends_on = [aws_lb.clixx_lb]
+
+  health_check {
+    # path                = "/index.html"
+    protocol            = "HTTP"
+    interval            = 15
+    timeout             = 3
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
 }
+
+#-------------------------------------------------------------------------
+#creating LB listener
+#-------------------------------------------------------------------------
 
 resource "aws_lb_listener" "clixx-lb-listener" {
   load_balancer_arn = aws_lb.clixx_lb.arn
-  port              = var.lb_listener_port
-  protocol          = var.lb_listener_protocol
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"
@@ -30,93 +49,81 @@ resource "aws_lb_listener" "clixx-lb-listener" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "clixx-tg-attachment_az_a" {
-  count            = length(aws_instance.aws_server_clixx_az_a)
-  target_group_arn = aws_lb_target_group.clixx_lb_target_group.arn
-  target_id        = aws_instance.aws_server_clixx_az_a[count.index].id
-  port             = var.lb_target_port
-}
+#-------------------------------------------------------------------------
+# creating launch configuration
+#-------------------------------------------------------------------------
 
-resource "aws_lb_target_group_attachment" "clixx-tg-attachment_az_b" {
-  count            = length(aws_instance.aws_server_clixx_az_b)
-  target_group_arn = aws_lb_target_group.clixx_lb_target_group.arn
-  target_id        = aws_instance.aws_server_clixx_az_b[count.index].id
-  port             = var.lb_target_port
-}
+resource "aws_launch_configuration" "clixx-launch-config" {
+  name_prefix                 = "${local.ApplicationPrefix}-app-launch-config"
+  image_id                    = data.aws_ami.stack_ami.image_id
+  instance_type               = var.EC2_Components["instance_type"]
+  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  user_data                   = data.template_file.bootstrap.rendered
+  associate_public_ip_address = true
+  # key_name                    = aws_key_pair.stack_key_pair.key_name
+  key_name = "private-key-kp"
 
-#creating Launch Template
-resource "aws_launch_template" "clixx-app-launch-temp" {
-  name          = "${local.ApplicationPrefix}-launch-temp"
-  image_id      = var.image_id
-  instance_type = var.instance_type
-  key_name      = aws_key_pair.stack_key_pair.key_name
-  user_data     = filebase64("${path.module}/scripts/bootstrap.sh")
-
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [aws_security_group.stack-sg.id, aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  lifecycle {
+    create_before_destroy = true
   }
 
-  block_device_mappings {
+  root_block_device {
+    volume_type           = var.EC2_Components["volume_type"]
+    volume_size           = var.EC2_Components["volume_size"]
+    delete_on_termination = var.EC2_Components["delete_on_termination"]
+    encrypted             = var.EC2_Components["encrypted"]
+  }
+
+  ebs_block_device {
     device_name = "/dev/sdb"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdc"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdd"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sde"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
-  block_device_mappings {
+  ebs_block_device {
     device_name = "/dev/sdf"
-    ebs {
-      volume_size = 10
-      volume_type = "gp2"
-      encrypted   = true
-    }
-  }
-
-  tags = {
-    Name = "Clixx_Instance"
+    volume_size = 10
+    volume_type = "gp2"
+    encrypted   = true
   }
 
 }
 
+#-------------------------------------------------------------------------
 #creating Auto Scaling Group
+#-------------------------------------------------------------------------
+
 resource "aws_autoscaling_group" "clixx_app_asg" {
   name                      = "${local.ApplicationPrefix}-asg"
-  desired_capacity          = var.desired_capacity
-  max_size                  = var.max_size
-  min_size                  = var.min_size
-  health_check_grace_period = 30
-  health_check_type         = var.asg_health_check_type
-  vpc_zone_identifier       = [aws_subnet.pub_subnet_1.id, aws_subnet.pub_subnet_2.id]
+  launch_configuration      = aws_launch_configuration.clixx-launch-config.name
+  desired_capacity          = 4
+  max_size                  = 6
+  min_size                  = 4
+  health_check_grace_period = 300
+  health_check_type         = "EC2"
+  vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
   target_group_arns         = [aws_lb_target_group.clixx_lb_target_group.arn]
   default_cooldown          = 300
 
@@ -130,9 +137,10 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
 
   metrics_granularity = "1Minute"
 
-  launch_template {
-    id      = aws_launch_template.clixx-app-launch-temp.id
-    version = aws_launch_template.clixx-app-launch-temp.latest_version
+  tag {
+    key                 = "Name"
+    value               = "Clixx-App"
+    propagate_at_launch = true
   }
 
   depends_on = [aws_lb.clixx_lb]
@@ -144,7 +152,7 @@ resource "aws_autoscaling_policy" "scaling_up" {
   autoscaling_group_name = aws_autoscaling_group.clixx_app_asg.name
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1"
-  cooldown               = "30"
+  cooldown               = "60" #Amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
   policy_type            = "SimpleScaling"
 }
 
@@ -187,7 +195,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   namespace           = "AWS/EC2"
   period              = "120"
   statistic           = "Average"
-  threshold           = "10" # Instance will scale down when CPU utilization is lower than 5 %
+  threshold           = "20" # Instance will scale down when CPU utilization is lower than 5 %
   dimensions = {
     "AutoScalingGroupName" = aws_autoscaling_group.clixx_app_asg.name
   }

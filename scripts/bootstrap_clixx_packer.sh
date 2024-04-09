@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/bash 
 
 sudo su - 
 
+#EBS configuration
 # partitioning disk - sdb (xvdb)
 fdisk /dev/sdb <<EEOF
 p
@@ -116,10 +117,11 @@ echo "/dev/mapper/stack_vg-Lv_backup /backup ext4 defaults 1 2" >> "/etc/fstab"
 
 ls -ltr
 
+
 #sudo su -
 sudo yum update -y
 sudo yum install -y nfs-utils
-FILE_SYSTEM_ID=${efs_id_blog}
+FILE_SYSTEM_ID=${efs_id}
 
 #EFS CREATION AND MOUNTING
 TOKEN=$(curl --request PUT "http://169.254.169.254/latest/api/token" --header "X-aws-ec2-metadata-token-ttl-seconds: 3600")
@@ -131,55 +133,66 @@ echo $FILE_SYSTEM_ID.efs.$REGION.amazonaws.com:/ $MOUNT_POINT nfs4 nfsvers=4.1,r
 mount -a -t nfs4
 chmod -R 755 /var/www/html
 
-#installing PHP Admin
-sudo yum install php-mbstring -y
-
-sudo systemctl restart httpd
-sudo systemctl restart php-fpm
-
-#installing git
-cd /var/www/html
+# ##Install the needed packages and enable the services(MariaDb, Apache)
 # sudo yum install git -y
+# sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+# sudo yum install -y httpd mariadb-server
+# sudo systemctl start httpd
+# sudo systemctl enable httpd
+# sudo systemctl is-enabled httpd
 
-sudo mkdir installation
-cd installation
-sudo git clone ${GIT_REPO_BLOG}
-# sudo git clone https://github.com/isaacamboson/my_stack_blog.git
-cp -rf my_stack_blog/* /var/www/html
+# ##Add ec2-user to Apache group and grant permissions to /var/www
+# sudo usermod -a -G apache ec2-user
+# sudo chown -R ec2-user:apache /var/www
+# sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
+# find /var/www -type f -exec sudo chmod 0664 {} \;
+# cd /var/www/html
 
-#creating database user and database for WordPress installation:
-db_name=${rds_mysql_db_blog}
-db_user=${rds_mysql_usr_blog}
-db_password=${rds_mysql_pwd_blog}
-rds_instance=${rds_mysql_ept_blog}
-db_email="isaacamboson@gmail.com"
+sudo git clone ${GIT_REPO}
+# git clone https://github.com/stackitgit/CliXX_Retail_Repository.git
+cp -r CliXX_Retail_Repository/* /var/www/html
 
+#replacing the value of database in the wp-config file with our rds instance name
+rds_instance=${rds_mysql_ept}
 wp_config=/var/www/html/wp-config.php
+sed -i "s/'wordpress-db.cc5iigzknvxd.us-east-1.rds.amazonaws.com'/'$rds_instance'/g" $wp_config
 
-sed -i "s/'database_name_here'/'$db_name'/g" $wp_config
-sed -i "s/'username_here'/'$db_user'/g" $wp_config
-sed -i "s/'password_here'/'$db_password'/g" $wp_config
-sed -i "s/'rds_instance_here'/'$rds_instance'/g" $wp_config
+#updating rds instance / database with the new load balancer dns from terraform output
+rds_mysql_endpoint=${rds_mysql_ept}
+rds_mysql_user=${rds_mysql_usr}
+rds_mysql_password=${rds_mysql_pwd}
+rds_mysql_database=${rds_mysql_db}
 
-load_balancer_dns=${LB_DNS_BLOG}
+load_balancer_dns=${LB_DNS}
 
-mysql -h $rds_instance -u $db_user -p$db_password -D $db_name <<EOF
+mysql -h $rds_mysql_endpoint -u $rds_mysql_user -p$rds_mysql_password -D $rds_mysql_database <<EOF
 UPDATE wp_options SET option_value = "$load_balancer_dns" WHERE option_id = '1';
 UPDATE wp_options SET option_value = "$load_balancer_dns" WHERE option_id = '2';
 EOF
 
-#restart apache http server and enable services
+# ## Allow wordpress to use Permalinks
+# sudo sed -i '151s/None/All/' /etc/httpd/conf/httpd.conf
+ 
+# ##Grant file ownership of /var/www & its contents to apache user
+# sudo chown -R apache /var/www
+ 
+# ##Grant group ownership of /var/www & contents to apache group
+# sudo chgrp -R apache /var/www
+ 
+##Change directory permissions of /var/www & its subdir to add group write 
+sudo chmod 2775 /var/www
+find /var/www -type d -exec sudo chmod 2775 {} \;
+ 
+##Recursively change file permission of /var/www & subdir to add group write perm
+sudo find /var/www -type f -exec sudo chmod 0664 {} \;
+ 
+##Restart Apache
 sudo systemctl restart httpd
-sudo systemctl enable httpd && sudo systemctl enable mariadb
-
-#sudo systemctl status of MySQL and apache HTTP server
-sudo systemctl status mariadb
-sudo systemctl status httpd
-
-# Restart Apache to make sure all changes take effect
-sudo systemctl restart httpd
-
-
+sudo service httpd restart
+ 
+##Enable httpd 
+sudo systemctl enable httpd 
+sudo /sbin/sysctl -w net.ipv4.tcp_keepalive_time=200 net.ipv4.tcp_keepalive_intvl=200 net.ipv4.tcp_keepalive_probes=5
 
 
 

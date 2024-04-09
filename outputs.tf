@@ -29,3 +29,4 @@ output "efs_id_blog" {
   depends_on  = [aws_efs_file_system.efs_blog]
 }
 
+
