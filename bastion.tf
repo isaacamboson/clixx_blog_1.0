@@ -21,7 +21,6 @@ resource "aws_instance" "bastion_az_a" {
   ami                    = data.aws_ami.stack_ami.id
   instance_type          = var.EC2_Components["instance_type"]
   vpc_security_group_ids = [aws_security_group.bastion-sg.id]
-  # key_name                    = aws_key_pair.stack_key_pair.key_name
   key_name                    = "bastion_kp"
   subnet_id                   = aws_subnet.pub_subnet_1.id
   associate_public_ip_address = "true"
