@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
-        ACTION = "destroy"
+        ACTION = "apply"
         RUNNER = "Isaac"
     }
 
@@ -22,7 +22,6 @@ pipeline {
              }
          }
 
-
          stage('terraform plan'){
             steps {
                 // sh "terraform plan --auto-approve"
@@ -38,7 +37,6 @@ pipeline {
                 }
             }
          }
-
 
         stage('Terraform Final Action'){
             steps {
