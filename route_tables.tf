@@ -23,7 +23,7 @@ resource "aws_route_table_association" "rt_association_pb_sbnt_2" {
   route_table_id = aws_route_table.pub_custom_route_table.id
 }
 
-#creating a custom route table for the private subnet - AZ A
+#creating a custom route table for the private subnets - AZ A
 resource "aws_route_table" "prv_custom_route_table_az_a" {
   count  = 1
   vpc_id = aws_vpc.vpc_main.id
@@ -38,7 +38,7 @@ resource "aws_route_table" "prv_custom_route_table_az_a" {
   }
 }
 
-#creating a custom route table for the private subnet - AZ B
+#creating a custom route table for the privates subnet - AZ B
 resource "aws_route_table" "prv_custom_route_table_az_b" {
   count  = 1
   vpc_id = aws_vpc.vpc_main.id
