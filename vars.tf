@@ -80,6 +80,10 @@ variable "EC2_Components" {
   }
 }
 
+variable "device_names" {
+  default = ["/dev/sdb", "/dev/sdc", "/dev/sdd", "/dev/sde", "/dev/sdf"]
+}
+
 # rds / database variables for clixx app
 # variable "rds_ept" {}
 # variable "rds_usr" {}

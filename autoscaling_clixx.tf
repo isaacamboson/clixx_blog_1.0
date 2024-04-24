@@ -73,40 +73,50 @@ resource "aws_launch_configuration" "clixx-launch-config" {
     encrypted             = var.EC2_Components["encrypted"]
   }
 
-  ebs_block_device {
-    device_name = "/dev/sdb"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
+  dynamic "ebs_block_service" {
+    for_each = var.device_names
+    content {
+      device_name = ebs_block_device.value
+      volume_size = 10
+      volume_type = "gp2"
+      encrypted = true
+    }    
   }
 
-  ebs_block_device {
-    device_name = "/dev/sdc"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
+  # ebs_block_device {
+  #   device_name = "/dev/sdb"
+  #   volume_size = 10
+  #   volume_type = "gp2"
+  #   encrypted   = true
+  # }
 
-  ebs_block_device {
-    device_name = "/dev/sdd"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
+  # ebs_block_device {
+  #   device_name = "/dev/sdc"
+  #   volume_size = 10
+  #   volume_type = "gp2"
+  #   encrypted   = true
+  # }
 
-  ebs_block_device {
-    device_name = "/dev/sde"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
+  # ebs_block_device {
+  #   device_name = "/dev/sdd"
+  #   volume_size = 10
+  #   volume_type = "gp2"
+  #   encrypted   = true
+  # }
 
-  ebs_block_device {
-    device_name = "/dev/sdf"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
+  # ebs_block_device {
+  #   device_name = "/dev/sde"
+  #   volume_size = 10
+  #   volume_type = "gp2"
+  #   encrypted   = true
+  # }
+
+  # ebs_block_device {
+  #   device_name = "/dev/sdf"
+  #   volume_size = 10
+  #   volume_type = "gp2"
+  #   encrypted   = true
+  # }
 
 }
 
