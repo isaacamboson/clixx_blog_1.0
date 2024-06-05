@@ -17,10 +17,10 @@ resource "aws_eip_association" "eip_assoc_bastion_az_a" {
 
 # Bastion AWS instance in AZ-A
 resource "aws_instance" "bastion_az_a" {
-  count                  = var.stack_controls["ec2_create"] == "Y" ? 1 : 0
-  ami                    = data.aws_ami.stack_ami.id
-  instance_type          = var.EC2_Components["instance_type"]
-  vpc_security_group_ids = [aws_security_group.bastion-sg.id]
+  count                       = var.stack_controls["ec2_create"] == "Y" ? 1 : 0
+  ami                         = data.aws_ami.stack_ami.id
+  instance_type               = var.EC2_Components["instance_type"]
+  vpc_security_group_ids      = [aws_security_group.bastion-sg.id]
   key_name                    = "bastion_kp"
   subnet_id                   = aws_subnet.pub_subnet_1.id
   associate_public_ip_address = "true"

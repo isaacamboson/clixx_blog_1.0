@@ -54,13 +54,12 @@ resource "aws_lb_listener" "clixx-lb-listener" {
 #-------------------------------------------------------------------------
 
 resource "aws_launch_configuration" "clixx-launch-config" {
-  name_prefix                 = "${local.ApplicationPrefix}-app-launch-config"
-  image_id                    = data.aws_ami.stack_ami.image_id
-  instance_type               = var.EC2_Components["instance_type"]
-  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
-  user_data                   = data.template_file.bootstrap.rendered
-  associate_public_ip_address = true
-  # key_name                    = aws_key_pair.stack_key_pair.key_name
+  name_prefix     = "${local.ApplicationPrefix}-app-launch-config"
+  image_id        = data.aws_ami.stack_ami.image_id
+  instance_type   = var.EC2_Components["instance_type"]
+  security_groups = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
+  user_data       = data.template_file.bootstrap.rendered
+  # associate_public_ip_address = true
   key_name = "private-key-kp"
 
   lifecycle {
@@ -73,6 +72,16 @@ resource "aws_launch_configuration" "clixx-launch-config" {
     delete_on_termination = var.EC2_Components["delete_on_termination"]
     encrypted             = var.EC2_Components["encrypted"]
   }
+
+  # dynamic "ebs_block_service" {
+  #   for_each = var.device_names
+  #   content {
+  #     device_name = ebs_block_device.value
+  #     volume_size = 10
+  #     volume_type = "gp2"
+  #     encrypted = true
+  #   }    
+  # }
 
   ebs_block_device {
     device_name = "/dev/sdb"
@@ -120,7 +129,7 @@ resource "aws_autoscaling_group" "clixx_app_asg" {
   launch_configuration      = aws_launch_configuration.clixx-launch-config.name
   desired_capacity          = 4
   max_size                  = 6
-  min_size                  = 4
+  min_size                  = 2
   health_check_grace_period = 300
   health_check_type         = "EC2"
   vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
