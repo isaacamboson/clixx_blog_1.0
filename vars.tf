@@ -30,12 +30,12 @@ variable "private_subnet_cidrs" {
     "10.0.0.0/24",  # 254 hosts   - Application Server
     "10.0.8.0/22",  # 1022 hosts  - RDS
     "10.0.16.0/24", # 254 hosts   - Oracle DB
-    "10.0.18.0/26", # 62 hosts    - deployment of Java app db
+    "10.0.18.0/26", # 62 hosts    - deployment of Java app
     "10.0.20.0/26", # 62 hosts    - deployment of Java app db
     "10.0.1.0/24",  # 254 hosts   - Application Server
     "10.0.12.0/22", # 1022 hosts  - RDS
     "10.0.17.0/24", # 254 hosts   - Oracle DB
-    "10.0.19.0/26", # 62 hosts    - deployment of Java app db
+    "10.0.19.0/26", # 62 hosts    - deployment of Java app
     "10.0.21.0/26"  # 62 hosts    - deployment of Java appn db
   ]
 }
