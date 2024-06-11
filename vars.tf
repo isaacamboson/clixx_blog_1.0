@@ -1,5 +1,3 @@
-# variable "AWS_ACCESS_KEY" {}
-# variable "AWS_SECRET_KEY" {}
 variable "AWS_REGION" {
   default = "us-east-1"
 }
@@ -84,16 +82,3 @@ variable "device_names" {
   default = ["/dev/sdb", "/dev/sdc", "/dev/sdd", "/dev/sde", "/dev/sdf"]
 }
 
-# rds / database variables for clixx app
-# variable "rds_ept" {}
-# variable "rds_usr" {}
-# variable "rds_pwd" {}
-# variable "rds_db" {}
-# variable "git_repo1" {}
-
-# rds / database variables for blog
-# variable "rds_ept_blog" {}
-# variable "rds_usr_blog" {}
-# variable "rds_pwd_blog" {}
-# variable "rds_db_blog" {}
-# variable "git_repo_blog" {}
