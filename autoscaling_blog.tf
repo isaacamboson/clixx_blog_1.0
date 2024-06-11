@@ -4,11 +4,11 @@
 #-------------------------------------------------------------------------
 
 resource "aws_lb" "blog_lb" {
-  name                       = "${local.BlogPrefix}-lb"
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = [aws_security_group.stack-sg.id, aws_security_group.bastion-sg.id]
-  subnets                    = [aws_subnet.pub_subnet_1.id, aws_subnet.pub_subnet_2.id]
+  name               = "${local.BlogPrefix}-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.stack-sg.id, aws_security_group.bastion-sg.id]
+  subnets            = aws_subnet.pub_subnets.*.id
   enable_deletion_protection = false
 }
 
@@ -20,7 +20,8 @@ resource "aws_lb_target_group" "blog_lb_target_group" {
   name     = "${local.BlogPrefix}-lb-target-group"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.vpc_main.id
+  vpc_id     = aws_vpc.vpc_main.id
+  depends_on = [aws_lb.blog_lb]
 
   health_check {
     path                = "/"
@@ -47,110 +48,87 @@ resource "aws_lb_listener" "blog-lb-listener" {
   }
 }
 
-#-------------------------------------------------------------------------
-# creating launch configuration
-#-------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+#creating Launch Template for the autoscaling group instances
+#-----------------------------------------------------------------------------
 
-resource "aws_launch_configuration" "blog-launch-config" {
-  name_prefix                 = "${local.BlogPrefix}-app-launch-config"
-  image_id                    = data.aws_ami.stack_ami.image_id
-  instance_type               = var.EC2_Components["instance_type"]
-  security_groups             = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
-  user_data                   = data.template_file.bootstrap_blog.rendered
-  associate_public_ip_address = true
-  key_name                    = "private-key-kp"
+resource "aws_launch_template" "blog-app-launch-temp" {
+  name                   = "${local.BlogPrefix}-launch-temp"
+  image_id               = data.aws_ami.stack_ami.image_id
+  instance_type          = var.EC2_Components["instance_type"]
+  key_name               = "private-key-kp"
+  user_data              = base64encode(data.template_file.bootstrap_blog.rendered)
+  vpc_security_group_ids = [aws_security_group.app-server-sg.id, aws_security_group.bastion-sg.id]
 
-  lifecycle {
-    create_before_destroy = true
+  monitoring {
+    enabled = true
   }
 
-  root_block_device {
-    volume_type           = var.EC2_Components["volume_type"]
-    volume_size           = var.EC2_Components["volume_size"]
-    delete_on_termination = var.EC2_Components["delete_on_termination"]
-    encrypted             = var.EC2_Components["encrypted"]
+  dynamic "block_device_mappings" {
+    for_each = var.device_names
+    content {
+      device_name = block_device_mappings.value
+
+      ebs {
+        volume_size = 10
+        volume_type = "gp2"
+        encrypted   = true
+      }
+    }
   }
 
-  # dynamic "ebs_block_service" {
-  #   for_each = var.device_names
-  #   content {
-  #     device_name = ebs_block_device.value
-  #     volume_size = 10
-  #     volume_type = "gp2"
-  #     encrypted = true
-  #   }    
-  # }
-
-  ebs_block_device {
-    device_name = "/dev/sdb"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "/dev/sdc"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "/dev/sdd"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "/dev/sde"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "/dev/sdf"
-    volume_size = 10
-    volume_type = "gp2"
-    encrypted   = true
+  tags = {
+    Name = "${local.BlogPrefix}_Instance"
   }
 }
 
-#-------------------------------------------------------------------------
-#creating Auto Scaling Group
-#-------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+## Creates an ASG linked with our main VPC
+#-----------------------------------------------------------------------------
 
 resource "aws_autoscaling_group" "blog_app_asg" {
-  name                      = "${local.BlogPrefix}-asg"
-  launch_configuration      = aws_launch_configuration.blog-launch-config.name
+  name                      = "${local.BlogPrefix}_ASG_${var.environment}"
   desired_capacity          = 4
   max_size                  = 6
   min_size                  = 2
   health_check_grace_period = 300
+  vpc_zone_identifier       = [aws_subnet.private_subnets[0].id, aws_subnet.private_subnets[1].id]
   health_check_type         = "EC2"
-  vpc_zone_identifier       = [aws_subnet.prv_subnet_1.id, aws_subnet.prv_subnet_6.id]
   target_group_arns         = [aws_lb_target_group.blog_lb_target_group.arn]
   default_cooldown          = 300
+  protect_from_scale_in     = true
 
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",
     "GroupDesiredCapacity",
     "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupStandbyInstances",
+    "GroupTerminatingInstances",
     "GroupTotalInstances"
   ]
 
   metrics_granularity = "1Minute"
 
+  launch_template {
+    id      = aws_launch_template.blog-app-launch-temp.id
+    version = "$Latest"
+  }
+
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
+
   tag {
     key                 = "Name"
-    value               = "Blog"
+    value               = "${local.BlogPrefix}_ASG_${var.environment}"
     propagate_at_launch = true
   }
 
   depends_on = [aws_lb.blog_lb]
 }
+
 
 #scaling up policy
 resource "aws_autoscaling_policy" "scaling_up_blog" {
@@ -158,7 +136,7 @@ resource "aws_autoscaling_policy" "scaling_up_blog" {
   autoscaling_group_name = aws_autoscaling_group.blog_app_asg.name
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1"
-  cooldown               = "60"
+  cooldown               = "60" #Amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
   policy_type            = "SimpleScaling"
 }
 
@@ -178,7 +156,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm_blog" {
     "AutoScalingGroupName" = aws_autoscaling_group.blog_app_asg.name
   }
   actions_enabled = true
-  alarm_actions   = [aws_autoscaling_policy.scaling_up_blog.arn]
+  alarm_actions   = [aws_autoscaling_policy.scaling_up.arn]
 }
 
 #scaling down policy
@@ -206,6 +184,6 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm_blog" {
     "AutoScalingGroupName" = aws_autoscaling_group.blog_app_asg.name
   }
   actions_enabled = true
-  alarm_actions   = [aws_autoscaling_policy.scaling_down_blog.arn]
+  alarm_actions   = [aws_autoscaling_policy.scaling_down.arn]
 }
 

@@ -12,7 +12,7 @@ data "template_file" "bootstrap" {
     rds_mysql_db  = local.db_creds.rds_db  #var.rds_db
 
     #efs file system ID to be passed into bootstrap bash script for efs mount
-    efs_id = aws_efs_file_system.efs_1.id
+    efs_id = aws_efs_file_system.efs_clixx.id
   }
 }
 
