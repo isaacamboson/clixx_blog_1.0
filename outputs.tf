@@ -19,8 +19,8 @@ output "load_balancer_dns_blog" {
 
 output "efs_id_clixx" {
   description = "EFS ID of file system"
-  value       = aws_efs_file_system.efs_1.id
-  depends_on  = [aws_efs_file_system.efs_1]
+  value       = aws_efs_file_system.efs_clixx.id
+  depends_on  = [aws_efs_file_system.efs_clixx]
 }
 
 output "efs_id_blog" {
@@ -28,4 +28,5 @@ output "efs_id_blog" {
   value       = aws_efs_file_system.efs_blog.id
   depends_on  = [aws_efs_file_system.efs_blog]
 }
+
 

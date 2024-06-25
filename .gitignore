@@ -2,6 +2,6 @@
 my_key
 my_key.pub
 .terraform.lock.hcl
-terraform.tfvars
+*.tfvars
 *.pem
 *.ppk

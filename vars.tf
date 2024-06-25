@@ -1,5 +1,3 @@
-# variable "AWS_ACCESS_KEY" {}
-# variable "AWS_SECRET_KEY" {}
 variable "AWS_REGION" {
   default = "us-east-1"
 }
@@ -30,12 +28,12 @@ variable "private_subnet_cidrs" {
     "10.0.0.0/24",  # 254 hosts   - Application Server
     "10.0.8.0/22",  # 1022 hosts  - RDS
     "10.0.16.0/24", # 254 hosts   - Oracle DB
-    "10.0.18.0/26", # 62 hosts    - deployment of Java app db
+    "10.0.18.0/26", # 62 hosts    - deployment of Java app
     "10.0.20.0/26", # 62 hosts    - deployment of Java app db
     "10.0.1.0/24",  # 254 hosts   - Application Server
     "10.0.12.0/22", # 1022 hosts  - RDS
     "10.0.17.0/24", # 254 hosts   - Oracle DB
-    "10.0.19.0/26", # 62 hosts    - deployment of Java app db
+    "10.0.19.0/26", # 62 hosts    - deployment of Java app
     "10.0.21.0/26"  # 62 hosts    - deployment of Java appn db
   ]
 }
@@ -80,16 +78,7 @@ variable "EC2_Components" {
   }
 }
 
-# rds / database variables for clixx app
-# variable "rds_ept" {}
-# variable "rds_usr" {}
-# variable "rds_pwd" {}
-# variable "rds_db" {}
-# variable "git_repo1" {}
+variable "device_names" {
+  default = ["/dev/sdb", "/dev/sdc", "/dev/sdd", "/dev/sde", "/dev/sdf"]
+}
 
-# rds / database variables for blog
-# variable "rds_ept_blog" {}
-# variable "rds_usr_blog" {}
-# variable "rds_pwd_blog" {}
-# variable "rds_db_blog" {}
-# variable "git_repo_blog" {}
