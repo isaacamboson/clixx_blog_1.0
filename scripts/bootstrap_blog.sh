@@ -174,7 +174,6 @@ sudo yum install git -y
 sudo mkdir installation
 cd installation
 sudo git clone ${GIT_REPO_BLOG}
-# sudo git clone https://github.com/isaacamboson/my_stack_blog.git
 cp -rf my_stack_blog/* /var/www/html
 
 #creating database user and database for WordPress installation:

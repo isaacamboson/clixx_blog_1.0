@@ -149,7 +149,6 @@ find /var/www -type f -exec sudo chmod 0664 {} \;
 cd /var/www/html
 
 sudo git clone ${GIT_REPO}
-# git clone https://github.com/stackitgit/CliXX_Retail_Repository.git
 cp -r CliXX_Retail_Repository/* /var/www/html
 
 #replacing the value of database in the wp-config file with our rds instance name
