@@ -6,6 +6,9 @@ locals {
   ServerPrefix      = ""
   AZ_A              = "AZ_A"
   AZ_B              = "AZ_B"
+
+  inbound_ports     = [80, 443, 8080, 22, 3306, 2049]
+
   db_creds = jsondecode(
     data.aws_secretsmanager_secret_version.creds.secret_string
   )
